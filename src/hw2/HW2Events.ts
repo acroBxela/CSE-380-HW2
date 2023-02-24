@@ -41,6 +41,11 @@ export const HW2Events = {
 
     LASER_MINE_COLLISION: "LASER_MINE_COLLISION",
 
-    MINE_EXPLODED: "MINE_EXPLODED"
-    
+    MINE_EXPLODED: "MINE_EXPLODED",
+
+    // {id: bubble.id} 
+    BUBBLE_COLLECTED: "BUBBLE_COLLECTED",
+
+    // {currentHealth:sub.currentHealth, maxHealth:sub.maxHealth, currentAir:sub.currentAir,maxAir:sub.maxAir}
+    SUB_PROPS_CHANGED: "SUB_PROPS_CHANGED"  
 } as const;

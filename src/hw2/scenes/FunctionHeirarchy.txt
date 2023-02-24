@@ -1,0 +1,16 @@
+UpdateScene
+	HandleEvent
+		SpawnLaser
+		handleChargeChange
+		handleMineLaserCollision
+
+	HandleTimers
+		SpawnMine
+		SpawnBubble
+
+	HandleScreenDespawn
+
+	HandlePlayerBubbleCollision
+	HandleMinePlayerCollision
+
+	MoveBackground

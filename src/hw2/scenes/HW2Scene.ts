@@ -167,8 +167,13 @@ export default class HW2Scene extends Scene {
 		this.receiver.subscribe(HW2Events.SHOOT_LASER);
 		this.receiver.subscribe(HW2Events.DEAD);
 
+		//this.receiver.subscribe(HW2Events.PLAYER_MINE_COLLISION);
+
 		// Subscribe to laser events
 		this.receiver.subscribe(HW2Events.FIRING_LASER);
+
+		// subscribe to sub event
+		this.receiver.subscribe(HW2Events.SUB_PROPS_CHANGED);
 	}
 	/**
 	 * @see Scene.updateScene 
@@ -187,9 +192,10 @@ export default class HW2Scene extends Scene {
 		this.handleMinePlayerCollisions();
 		this.bubblesPopped += this.handleBubblePlayerCollisions();
 
+		this.handleAirChange(this.player.ai.currentAir,this.player.ai.maxAir);
+
 		// Handle timers
 		this.handleTimers();
-
         // TODO Remove despawning of mines and bubbles here
 
 		// Handle screen despawning of mines and bubbles
@@ -218,12 +224,18 @@ export default class HW2Scene extends Scene {
 	 */
 	protected handleEvent(event: GameEvent){
 		switch(event.type) {
-			case HW2Events.SHOOT_LASER: {
-				this.spawnLaser(event.data.get("src"));
+			case HW2Events.DEAD: {
+				//alert("test");
+				this.gameOverTimer.start();
 				break;
 			}
-			case HW2Events.DEAD: {
-				this.gameOverTimer.start();
+			case HW2Events.SUB_PROPS_CHANGED: {
+				//const {currentHealth,maxHealth,currentAir,maxAir}:{currentHealth:number,maxHealth:number,currentAir:number,maxAir:number} = event.data;
+				this.handleHealthChange(event.data.get("currentHealth"),event.data.get("maxHealth"));
+				break;
+			}
+			case HW2Events.SHOOT_LASER: {
+				this.spawnLaser(event.data.get("src"));
 				break;
 			}
 			case HW2Events.CHARGE_CHANGE: {
@@ -337,10 +349,10 @@ export default class HW2Scene extends Scene {
 		this.mineSpawnTimer = new Timer(500);
 		this.mineSpawnTimer.start();
 
-		this.bubbleSpawnTimer = new Timer(2500);
+		this.bubbleSpawnTimer = new Timer(20);
 		this.bubbleSpawnTimer.start();
 
-		this.gameOverTimer = new Timer(3000);
+		this.gameOverTimer = new Timer(2000);
 	}
 	/**
 	 * Initializes the background image sprites for the game.
@@ -537,7 +549,28 @@ export default class HW2Scene extends Scene {
 	 * 							X THIS IS OUT OF BOUNDS
 	 */
 	protected spawnBubble(): void {
-		// TODO spawn bubbles!
+		// Find the first visible mine
+		let bubble: Sprite = this.bubbles.find((bubble: Sprite) => { return !bubble.visible });
+
+		if (bubble){
+			// Bring this bubble to life
+			bubble.visible = true;
+
+			// Extract the size of the viewport
+			let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
+			let viewportSize = this.viewport.getHalfSize().scaled(2);
+
+			// Loop on position until we're clear of the player
+			bubble.position.copy(RandUtils.randVec(0, viewportSize.x,viewportSize.y, paddedViewportSize.y));
+			/*while(bubble.position.distanceTo(this.player.position) < 100){
+				bubble.position.copy(RandUtils.randVec(paddedViewportSize.x, paddedViewportSize.x, paddedViewportSize.y - viewportSize.y, viewportSize.y));
+			}*/
+
+			bubble.setAIActive(true, {});
+			// Start the bubble spawn timer - spawn a bubble every half a second I think
+			this.bubbleSpawnTimer.start(100);
+
+		}
 	}
 	/**
 	 * This function takes in a GameNode that may be out of bounds of the viewport and
@@ -736,6 +769,7 @@ export default class HW2Scene extends Scene {
 	 */
 	public handleBubblePlayerCollisions(): number {
 		// TODO check for collisions between the player and the bubbles
+		
         return;
 	}
 
