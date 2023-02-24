@@ -71,6 +71,7 @@ export default class PlayerController implements AI {
 
 		this.receiver.subscribe(HW2Events.SHOOT_LASER);
         this.receiver.subscribe(HW2Events.PLAYER_MINE_COLLISION);
+        this.receiver.subscribe(HW2Events.BUBBLE_COLLECTED);
 
         this.dead = false;
 
@@ -174,6 +175,10 @@ export default class PlayerController implements AI {
 				this.handleShootLaserEvent(event);
 				break;
 			}
+			case HW2Events.BUBBLE_COLLECTED: {
+				this.currentAir += 5;
+				break;
+			} 
 			case HW2Events.PLAYER_MINE_COLLISION: {
 				this.handleMineCollisionEvent(event);
 				break;

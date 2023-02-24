@@ -225,7 +225,6 @@ export default class HW2Scene extends Scene {
 	protected handleEvent(event: GameEvent){
 		switch(event.type) {
 			case HW2Events.DEAD: {
-				//alert("test");
 				this.gameOverTimer.start();
 				break;
 			}
@@ -562,9 +561,6 @@ export default class HW2Scene extends Scene {
 
 			// Loop on position until we're clear of the player
 			bubble.position.copy(RandUtils.randVec(0, viewportSize.x,viewportSize.y, paddedViewportSize.y));
-			/*while(bubble.position.distanceTo(this.player.position) < 100){
-				bubble.position.copy(RandUtils.randVec(paddedViewportSize.x, paddedViewportSize.x, paddedViewportSize.y - viewportSize.y, viewportSize.y));
-			}*/
 
 			bubble.setAIActive(true, {});
 			// Start the bubble spawn timer - spawn a bubble every half a second I think
@@ -768,7 +764,15 @@ export default class HW2Scene extends Scene {
 	 * an AABB and a Circle
 	 */
 	public handleBubblePlayerCollisions(): number {
-		// TODO check for collisions between the player and the bubbles
+		let collisions = 0;
+		for (let bubble of this.bubbles) {
+			if (bubble.visible && HW2Scene.checkAABBtoCircleCollision(this.player.collisionShape,bubble.collisionShape)) {
+				this.emitter.fireEvent(HW2Events.BUBBLE_COLLECTED, {id: bubble.id});
+				bubble.visible = false;
+				collisions += 1;
+			}
+		}	
+		return collisions;
 		
         return;
 	}
@@ -844,7 +848,20 @@ export default class HW2Scene extends Scene {
 	 */
 	public static checkAABBtoCircleCollision(aabb: AABB, circle: Circle): boolean {
         // TODO implement collision detection for AABBs and Circles
-        return;
+        var circleToAABBvec = new Vec2(aabb.center.x - circle.center.x, aabb.center.y - circle.center.y);
+        var scaled = circleToAABBvec.scaleTo(circle.radius);
+        scaled.add(circle.center);
+        console.log("------");
+        console.log(scaled.x,scaled.y);
+        console.log(aabb.left,aabb.right);
+        console.log(aabb.bottom,aabb.top);
+        console.log("------");
+
+        if ( (aabb.left <= scaled.x && aabb.right >= scaled.x) && (aabb.bottom >= scaled.y && aabb.top <= scaled.y) ){
+        	return true;
+        }
+        
+        return false;
 	}
 
     /** Methods for locking and wrapping nodes */
