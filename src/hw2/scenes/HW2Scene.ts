@@ -180,11 +180,16 @@ export default class HW2Scene extends Scene {
 	 */
 	public override updateScene(deltaT: number){
 		this.timePassed += deltaT;
+
 		// Handle events
 		while (this.receiver.hasNextEvent()) {
 			this.handleEvent(this.receiver.getNextEvent());
 		}
 		
+		this.lockPlayer(this.player,this.viewport.getCenter(),this.viewport.getHalfSize());
+		this.wrapPlayer(this.player,this.viewport.getCenter(),this.viewport.getHalfSize());
+
+
 		// Move the backgrounds
 		this.moveBackgrounds(deltaT);
 
@@ -612,7 +617,26 @@ export default class HW2Scene extends Scene {
 	 * It may be helpful to make your own drawings while figuring out the math for this part.
 	 */
 	public handleScreenDespawn(node: CanvasNode): void {
-        // TODO - despawn the game nodes when they move out of the padded viewport
+		// TODO - despawn the game nodes when they move out of the padded viewport
+		var halfWidth = node.size.x;
+		var halfHeight = node.size.y;
+
+		var x = node.position.x;
+		var y = node.position.y;
+
+		let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
+
+		var rightBoundary = paddedViewportSize.x;
+		var leftBoundary = 0;
+
+		var topBoundary = 0;
+		var bottomBoundary = paddedViewportSize.y;
+
+		if (x-halfWidth > rightBoundary || x+halfWidth < leftBoundary) {
+			node.visible = false;
+		}else if (y-halfHeight > bottomBoundary || y + halfHeight < topBoundary){
+			node.visible = false;
+		}
 	}
 
 	/** Methods for updating the UI */
@@ -851,11 +875,6 @@ export default class HW2Scene extends Scene {
         var circleToAABBvec = new Vec2(aabb.center.x - circle.center.x, aabb.center.y - circle.center.y);
         var scaled = circleToAABBvec.scaleTo(circle.radius);
         scaled.add(circle.center);
-        console.log("------");
-        console.log(scaled.x,scaled.y);
-        console.log(aabb.left,aabb.right);
-        console.log(aabb.bottom,aabb.top);
-        console.log("------");
 
         if ( (aabb.left <= scaled.x && aabb.right >= scaled.x) && (aabb.bottom >= scaled.y && aabb.top <= scaled.y) ){
         	return true;
@@ -912,6 +931,14 @@ export default class HW2Scene extends Scene {
 	 */
 	protected wrapPlayer(player: CanvasNode, viewportCenter: Vec2, viewportHalfSize: Vec2): void {
 		// TODO wrap the player around the top/bottom of the screen
+
+		if (player.collisionShape.top <= viewportCenter.y-viewportHalfSize.y-player.collisionShape.halfSize.y){
+			player.position.y += viewportCenter.y+viewportHalfSize.y;
+
+		}else if (player.collisionShape.bottom >= viewportCenter.y+viewportHalfSize.y+player.collisionShape.halfSize.y){
+			player.position.y -= viewportCenter.y+viewportHalfSize.y;
+
+		}
 	}
 
     /**
@@ -955,6 +982,18 @@ export default class HW2Scene extends Scene {
 	 */
 	protected lockPlayer(player: CanvasNode, viewportCenter: Vec2, viewportHalfSize: Vec2): void {
 		// TODO prevent the player from moving off the left/right side of the screen
+
+		if (player.collisionShape.left <= viewportCenter.x-viewportHalfSize.x){
+			var offset = (viewportCenter.x-viewportHalfSize.x) - player.collisionShape.left;
+			//this.emitter.fireEvent(HW2Events.OFFSET_PLAYER_POS, {"x": offset,"y":0});
+			player.position.x += offset;
+
+		}else if (player.collisionShape.right >= viewportCenter.x+viewportHalfSize.x){
+			var offset = (viewportCenter.x+viewportHalfSize.x) -  player.collisionShape.right;
+			//this.emitter.fireEvent(HW2Events.OFFSET_PLAYER_POS, {"x": offset,"y":0});
+
+			player.position.x += offset;
+		}
 	}
 
 	public handleTimers(): void {

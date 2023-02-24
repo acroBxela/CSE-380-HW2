@@ -41,6 +41,8 @@ export default class PlayerController implements AI {
 
     private invincible: boolean;
     private dead: boolean;
+    private blockMove:boolean;
+
 
 	/** A timer for charging the player's laser cannon thing */
 	private laserTimer: Timer;
@@ -67,19 +69,21 @@ export default class PlayerController implements AI {
 		this.invincible = false
 
 		this.laserTimer = new Timer(2500, this.handleLaserTimerEnd, false);
-		this.invincibilityTimer = new Timer(1000,this.handleInvincibilityTimerEnd,false);
+		this.invincibilityTimer = new Timer(10000,this.handleInvincibilityTimerEnd,false);
 
 		this.receiver.subscribe(HW2Events.SHOOT_LASER);
         this.receiver.subscribe(HW2Events.PLAYER_MINE_COLLISION);
         this.receiver.subscribe(HW2Events.BUBBLE_COLLECTED);
+        this.receiver.subscribe(HW2Events.OFFSET_PLAYER_POS);
 
         this.dead = false;
+        this.blockMove = false;
 
 		this.activate(options);
 	}
 	public activate(options: Record<string,any>): void {
 		// Set the player's current health
-        this.currentHealth = 1;
+        this.currentHealth = 10;
 
         // Set upper and lower bounds on the player's health
         this.minHealth = 0;
@@ -98,7 +102,6 @@ export default class PlayerController implements AI {
 
         // Set the player's movement speed
         this.currentSpeed = 300
-
         // Play the idle animation by default
 		this.owner.animation.play(PlayerAnimations.IDLE);
 	};
@@ -122,6 +125,7 @@ export default class PlayerController implements AI {
 	 * @param deltaT - the amount of time that has passed since the last update
 	 */
 	public update(deltaT: number): void {
+		console.log("PLAYER SECOND");
 		if (this.dead)
 			return;
         // First, handle all events 
@@ -153,6 +157,7 @@ export default class PlayerController implements AI {
 		let movement = Vec2.UP.scaled(forwardAxis * this.currentSpeed).add(new Vec2(horizontalAxis * this.currentSpeed, 0));
 		this.owner.position.add(movement.scaled(deltaT));
 
+
 		// Player looses a little bit of air each frame
 		this.currentAir = MathUtils.clamp(this.currentAir - deltaT, this.minAir, this.maxAir);
 
@@ -173,6 +178,10 @@ export default class PlayerController implements AI {
 		switch(event.type) {
 			case HW2Events.SHOOT_LASER: {
 				this.handleShootLaserEvent(event);
+				break;
+			}
+			case HW2Events.OFFSET_PLAYER_POS: {
+				this.handleOffsetPlayerPos(event);
 				break;
 			}
 			case HW2Events.BUBBLE_COLLECTED: {
@@ -237,6 +246,12 @@ export default class PlayerController implements AI {
 			return;
 		this.owner.animation.play(PlayerAnimations.IDLE);
 		this.invincible = false;
+	}
+
+	protected handleOffsetPlayerPos(event) {
+		this.owner.position.x += event.data.get("x");
+		this.owner.position.y += event.data.get("y");
+		this.blockMove = true;
 	}
 
 } 

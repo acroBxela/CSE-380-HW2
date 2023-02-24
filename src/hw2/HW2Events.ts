@@ -47,5 +47,8 @@ export const HW2Events = {
     BUBBLE_COLLECTED: "BUBBLE_COLLECTED",
 
     // {currentHealth:sub.currentHealth, maxHealth:sub.maxHealth, currentAir:sub.currentAir,maxAir:sub.maxAir}
-    SUB_PROPS_CHANGED: "SUB_PROPS_CHANGED"  
+    SUB_PROPS_CHANGED: "SUB_PROPS_CHANGED",
+
+    // {x:offset_x, y:offset_y}
+    OFFSET_PLAYER_POS: "OFFSET_PLAYER_POS"
 } as const;
