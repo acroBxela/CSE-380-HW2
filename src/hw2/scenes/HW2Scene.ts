@@ -15,6 +15,9 @@ import Timer from "../../Wolfie2D/Timing/Timer";
 import Circle from "../../Wolfie2D/DataTypes/Shapes/Circle";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 
+import EventQueue from "../../Wolfie2D/Events/EventQueue";
+
+
 import PlayerController from "../ai/PlayerController";
 
 import MineBehavior, { MineAnimations } from "../ai/MineBehavior";
@@ -31,6 +34,9 @@ import BasicRecording from "../../Wolfie2D/Playback/BasicRecording";
 
 import { HW2Events } from "../HW2Events";
 import Layer from "../../Wolfie2D/Scene/Layer";
+
+import MainMenu from "./MainMenu";
+
 
 /**
  * A type for layers in the HW3Scene. It seems natural to want to use some kind of enum type to
@@ -108,6 +114,8 @@ export default class HW2Scene extends Scene {
 	// The padding of the world
 	private worldPadding: Vec2;
 
+	private recorder: BasicRecording;
+
 	/** Scene lifecycle methods */
 
 	/**
@@ -116,6 +124,11 @@ export default class HW2Scene extends Scene {
 	public override initScene(options: Record<string, any>): void {
 		this.seed = options.seed === undefined ? RandUtils.randomSeed() : options.seed;
         this.recording = options.recording === undefined ? false : options.recording; 
+		if (this.recording){
+			var sceneRecording = new BasicRecording(HW2Scene,{"recording":false,"seed":options.seed});
+			this.emitter.fireEvent(GameEventType.START_RECORDING, {"recording": sceneRecording});
+		}
+		
 	}
 	/**
 	 * @see Scene.loadScene()
@@ -186,6 +199,7 @@ export default class HW2Scene extends Scene {
 			this.handleEvent(this.receiver.getNextEvent());
 		}
 		
+
 		this.lockPlayer(this.player,this.viewport.getCenter(),this.viewport.getHalfSize());
 		this.wrapPlayer(this.player,this.viewport.getCenter(),this.viewport.getHalfSize());
 
@@ -230,7 +244,13 @@ export default class HW2Scene extends Scene {
 	protected handleEvent(event: GameEvent){
 		switch(event.type) {
 			case HW2Events.DEAD: {
+				if (this.recording){
+					this.emitter.fireEvent(GameEventType.STOP_RECORDING, {});
+				}
+				this.handleHealthChange(0,10);
 				this.gameOverTimer.start();
+				
+
 				break;
 			}
 			case HW2Events.SUB_PROPS_CHANGED: {
@@ -238,6 +258,7 @@ export default class HW2Scene extends Scene {
 				this.handleHealthChange(event.data.get("currentHealth"),event.data.get("maxHealth"));
 				break;
 			}
+
 			case HW2Events.SHOOT_LASER: {
 				this.spawnLaser(event.data.get("src"));
 				break;
@@ -991,7 +1012,6 @@ export default class HW2Scene extends Scene {
 		}else if (player.collisionShape.right >= viewportCenter.x+viewportHalfSize.x){
 			var offset = (viewportCenter.x+viewportHalfSize.x) -  player.collisionShape.right;
 			//this.emitter.fireEvent(HW2Events.OFFSET_PLAYER_POS, {"x": offset,"y":0});
-
 			player.position.x += offset;
 		}
 	}
@@ -1007,11 +1027,18 @@ export default class HW2Scene extends Scene {
 		}
 		// If the game-over timer has run, change to the game-over scene
 		if (this.gameOverTimer.hasRun() && this.gameOverTimer.isStopped()) {
-		 	this.sceneManager.changeToScene(GameOver, {
-				bubblesPopped: this.bubblesPopped, 
-				minesDestroyed: this.minesDestroyed,
-				timePassed: this.timePassed
-			}, {});
+			if (!this.recording){
+				this.sceneManager.changeToScene(MainMenu);
+			}
+			else {
+
+			 	this.sceneManager.changeToScene(GameOver, {
+					bubblesPopped: this.bubblesPopped, 
+					minesDestroyed: this.minesDestroyed,
+					timePassed: this.timePassed
+				}, {});
+
+		 	}
 		}
 	}
 

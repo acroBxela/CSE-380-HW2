@@ -23,6 +23,7 @@ export default class LaserShaderType extends RectShaderType {
 		const program = this.resourceManager.getShaderProgram(this.programKey);
 		const buffer = this.resourceManager.getBuffer(this.bufferObjectKey);
 
+		console.log(options);
 		// Let WebGL know we're using our shader program
 		gl.useProgram(program);
 
@@ -34,6 +35,7 @@ export default class LaserShaderType extends RectShaderType {
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 		gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
 
+		console.log(options.color);
 		/* ##### ATTRIBUTES ##### */
 		// No texture, the only thing we care about is vertex position
 		const a_Position = gl.getAttribLocation(program, "a_Position");
@@ -63,7 +65,9 @@ export default class LaserShaderType extends RectShaderType {
 		const u_Transform = gl.getUniformLocation(program, "u_Transform");
 		gl.uniformMatrix4fv(u_Transform, false, transformation.toArray());
 
-		// Draw the quad
+		const u_Color = gl.getUniformLocation(program,"u_Color");
+		var c = options.color;
+		gl.uniform4fv(u_Color, [c.r,c.g,c.b,c.a]);
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	}
 
@@ -72,6 +76,7 @@ export default class LaserShaderType extends RectShaderType {
 			position: gc.position,
 			size: gc.size,
 			rotation: gc.rotation,
+			color: gc.color
 		}
 		return options;
 	}

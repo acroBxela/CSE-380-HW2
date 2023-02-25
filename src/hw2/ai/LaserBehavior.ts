@@ -58,7 +58,7 @@ export default class LaserBehavior implements AI {
         // Copy the values passed in for the src and dst
         this.src.copy(options.src);
         this.dst.copy(options.dst);
-
+        console.log(options);
         // Set position of the laser
         this.owner.position.x = (this.dst.x + this.src.x) / 2
         this.owner.position.y = this.src.y;

@@ -69,7 +69,7 @@ export default class PlayerController implements AI {
 		this.invincible = false
 
 		this.laserTimer = new Timer(2500, this.handleLaserTimerEnd, false);
-		this.invincibilityTimer = new Timer(10000,this.handleInvincibilityTimerEnd,false);
+		this.invincibilityTimer = new Timer(1000,this.handleInvincibilityTimerEnd,false);
 
 		this.receiver.subscribe(HW2Events.SHOOT_LASER);
         this.receiver.subscribe(HW2Events.PLAYER_MINE_COLLISION);
@@ -83,7 +83,7 @@ export default class PlayerController implements AI {
 	}
 	public activate(options: Record<string,any>): void {
 		// Set the player's current health
-        this.currentHealth = 10;
+        this.currentHealth = 1;
 
         // Set upper and lower bounds on the player's health
         this.minHealth = 0;
@@ -125,7 +125,6 @@ export default class PlayerController implements AI {
 	 * @param deltaT - the amount of time that has passed since the last update
 	 */
 	public update(deltaT: number): void {
-		console.log("PLAYER SECOND");
 		if (this.dead)
 			return;
         // First, handle all events 
@@ -145,6 +144,13 @@ export default class PlayerController implements AI {
 		// Get the player's input direction 
 		let forwardAxis = (Input.isPressed(HW2Controls.MOVE_UP) ? 1 : 0) + (Input.isPressed(HW2Controls.MOVE_DOWN) ? -1 : 0);
 		let horizontalAxis = (Input.isPressed(HW2Controls.MOVE_LEFT) ? -1 : 0) + (Input.isPressed(HW2Controls.MOVE_RIGHT) ? 1 : 0);
+
+		/*console.log("------");
+		console.log("up",Input.isPressed(HW2Controls.MOVE_UP));
+		console.log("down",Input.isPressed(HW2Controls.MOVE_DOWN));
+		console.log("left",Input.isPressed(HW2Controls.MOVE_LEFT));
+		console.log("right",Input.isPressed(HW2Controls.MOVE_RIGHT));
+		console.log("------");*/
 
 		// Handle trying to shoot a laser from the submarine
 		if (Input.isMouseJustPressed() && this.currentCharge > 0) {

@@ -10,6 +10,8 @@ import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import RandUtils from "../../Wolfie2D/Utils/RandUtils";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 
+
+
 // Layers in the main menu
 const MainMenuLayer = {
     MAIN_MENU: "MAIN_MENU", 
@@ -121,6 +123,7 @@ export default class MainMenu extends Scene {
         aboutBack.backgroundColor = Color.TRANSPARENT;
         aboutBack.onClickEventId = MainMenuEvent.MENU;
 
+
         // Subscribe to the button events
         this.receiver.subscribe(MainMenuEvent.PLAY_GAME);
         this.receiver.subscribe(MainMenuEvent.CONTROLS);
@@ -158,7 +161,8 @@ export default class MainMenu extends Scene {
                 break;
             }
             case MainMenuEvent.PLAY_RECORDING: {
-                // TODO play the recording here
+                console.log("PLAYING RECORDING!!!!")
+                this.emitter.fireEvent(GameEventType.PLAY_RECORDING, {"onEnd": function(){console.log("all done :)")}});
                 break;
             }
             default: {
