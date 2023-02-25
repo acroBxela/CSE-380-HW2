@@ -83,7 +83,7 @@ export default class PlayerController implements AI {
 	}
 	public activate(options: Record<string,any>): void {
 		// Set the player's current health
-        this.currentHealth = 1;
+        this.currentHealth = 10;
 
         // Set upper and lower bounds on the player's health
         this.minHealth = 0;
